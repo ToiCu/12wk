@@ -10,11 +10,12 @@ byte seven_seg_digits[10][7] = { { 1,1,1,1,1,1,0 },  // = 0
                                  { 1,1,1,0,0,1,1 }   // = 9
                              };
 
-const int buttonPin = 12;
+const int buttonPin = 10;
 int buttonState = 0;
 int num = 0;
 
-void setup() {               
+void setup() {
+  Serial.begin(19200);               
   pinMode(2, OUTPUT);  
   pinMode(3, OUTPUT);
   pinMode(4, OUTPUT);
@@ -22,11 +23,12 @@ void setup() {
   pinMode(6, OUTPUT);
   pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
+ 
 
- pinMode(9, OUTPUT);
+pinMode(9, OUTPUT);
   digitalWrite(9, 0);  // 關閉小數點
-  digitalWrite(buttonPin,HIGH);
   pinMode(buttonPin,INPUT);
+  digitalWrite(buttonPin,HIGH);
 }
 
 void sevenSegWrite(byte digit) {
@@ -40,14 +42,22 @@ void sevenSegWrite(byte digit) {
 void loop() {
   
   buttonState = digitalRead(buttonPin);
+    delay(20);
   
-  if(buttonState == LOW){
+  if(buttonState == 1){
      num ++;
+    
     if(num > 9){
        num = 0;
     }
 }
+  
+  if(buttonState==0){
+    num=0;
+      
+  }
+  
   sevenSegWrite(num); 
+  Serial.println(num);
  delay(1000);
-
 }
