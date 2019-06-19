@@ -1,0 +1,159 @@
+int latchPin = 8;
+int clockPin = 12;
+int dataPin = 11;
+int buttonState = 0;
+int buttonPin = 2;
+const int buzzer = 3;
+unsigned long time2;
+unsigned long time1;
+int aa;
+int bb;
+const int toneTable[7][5]={  
+  { 66, 131, 262, 523, 1046},  // C Do
+  { 74, 147, 294, 587, 1175},  // D Re
+  { 83, 165, 330, 659, 1318},  // E Mi
+  { 88, 175, 349, 698, 1397},  // F Fa
+  { 98, 196, 392, 784, 1568},  // G So
+  {110, 220, 440, 880, 1760},  // A La
+  {124, 247, 494, 988, 1976}   // B Si
+};
+char toneName[]="CDEFGAB";
+char beeTone[]="GEEFDDCDEFGGGGEEFDDCEGGEDDDDDEFEEEEEFGGEEFDDCEGGC";
+char starTone[]="CCGGAAGFFEEDDCGGFFEEDGGFFEEDCCGGAAGFFEEDDC";
+ 
+
+int beeBeat[]={
+  1,1,2, 1,1,2, 1,1,1,1,1,1,2,
+  1,1,2, 1,1,2, 1,1,1,1,4,
+  1,1,1,1,1,1,2, 1,1,1,1,1,1,2,
+  1,1,2, 1,1,2, 1,1,1,1,4
+};
+int starBeat[]={
+  1,1,1,1,1,1,2, 1,1,1,1,1,1,2,
+  1,1,1,1,1,1,2, 1,1,1,1,1,1,2,
+  1,1,1,1,1,1,2, 1,1,1,1,1,1,2
+};
+int getTone(char symbol) {
+  int toneNo = 0;
+  for ( int ii=0; ii<7; ii++ ) {
+      if ( toneName[ii]==symbol ) {
+          toneNo = ii;
+          break;
+      }
+  }
+  return toneNo;
+}
+byte colDataMatrix[8] = { 
+B01111111,
+B10111111,
+B11011111,
+B11101111,
+B11110111,
+B11111011,
+B11111101,
+B11111110
+};
+
+byte rowDataMatrix[8] = { 
+B11111111,
+B10000001,
+B10000001,
+B10000001,
+B10000001,
+B10000001,
+B10000001,
+B11111111
+};
+byte colDataMatrixa[8] = { 
+B01111111,
+B10111111,
+B11011111,
+B11101111,
+B11110111,
+B11111011,
+B11111101,
+B11111110
+};
+byte rowDataMatrixa[8] = { 
+B10000001,
+B01000010,
+B00100100,
+B00011000,
+B00011000,
+B00100100,
+B01000010,
+B10000001
+};
+int delay_time = 1000;
+void setup() {
+pinMode(latchPin,OUTPUT);
+pinMode(clockPin,OUTPUT);
+pinMode(dataPin,OUTPUT);
+pinMode(buttonPin,INPUT);
+digitalWrite(buttonPin,HIGH);
+pinMode(buzzer,OUTPUT);
+noTone(buzzer);
+time1 = 0;
+time2 = 0;
+aa = 0;
+bb = 0;
+}
+
+void loop() {
+ buttonState =digitalRead(buttonPin);
+
+ 
+  if(buttonState==0){
+
+    int  toneNo;
+toneNo = getTone(beeTone[aa]);
+   tone(buzzer,toneTable[toneNo][3]);
+    
+for(int i = 0; i < 8 ; i++){
+//byte colData = colDataMatrix[i];
+digitalWrite(latchPin,LOW);
+// pickDigit(i);
+shiftOut(dataPin, clockPin, MSBFIRST, colDataMatrix[i]);
+shiftOut(dataPin, clockPin, MSBFIRST, rowDataMatrix[i]);
+//shiftOut(dataPin, clockPin, MSBFIRST, colDataMatrix[i]);
+digitalWrite(latchPin,HIGH);
+}
+time2 = millis();
+    if(time2 - time1 >=500)
+    {
+      aa++;
+      time1 = time2;
+      noTone(buzzer);
+    }
+}
+
+else if(buttonState==1)
+{
+  int toneNo;
+  toneNo = getTone(starTone[bb]);
+      
+      tone(buzzer,toneTable[toneNo][3]);
+  
+  for(int i = 0; i < 8 ; i++){
+//byte colData = colDataMatrix[i];
+digitalWrite(latchPin,LOW);
+// pickDigit(i);
+shiftOut(dataPin, clockPin, MSBFIRST, colDataMatrixa[i]);
+shiftOut(dataPin, clockPin, MSBFIRST, rowDataMatrixa[i]);
+//shiftOut(dataPin, clockPin, MSBFIRST, colDataMatrix[i]);
+digitalWrite(latchPin,HIGH);
+  }
+ time2 = millis();
+  
+     if(time2 - time1 >=500)
+    {
+      bb++;
+      time1 = time2;
+      noTone(buzzer);
+    }
+  }
+}
+void pickDigit(int x) {
+byte rowByte = 1 << x;
+shiftOut(dataPin, clockPin, MSBFIRST, rowByte);
+}
